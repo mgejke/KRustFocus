@@ -108,15 +108,21 @@ fn handle_right() -> ControlFlow {
     ControlFlow::Continue
 }
 
+fn handle_quit() -> ControlFlow {
+    println!("Ctrl-Alt-Shift L was pressed - Exiting...");
+    ControlFlow::Exit
+}
+
 fn main() -> Result<()> {
     let mut hkm = HotkeyManager::new();
 
     hkm.register(VKey::Left, &[ModKey::Ctrl, ModKey::Alt], handle_left)?;
     hkm.register(VKey::Right, &[ModKey::Ctrl, ModKey::Alt], handle_right)?;
-    hkm.register(VKey::L, &[ModKey::Ctrl, ModKey::Alt, ModKey::Shift], || {
-        println!("Ctrl-Alt-Shift L was pressed - Exiting...");
-        ControlFlow::Exit
-    })?;
+    hkm.register(
+        VKey::L,
+        &[ModKey::Ctrl, ModKey::Alt, ModKey::Shift],
+        handle_quit,
+    )?;
 
     loop {
         match hkm.handle_hotkey() {
