@@ -56,7 +56,7 @@ fn get_windows() -> TabStopWindows {
     windows
 }
 
-pub(crate) fn handle_left() -> ControlFlow {
+pub(crate) fn left() -> ControlFlow {
     let mut windows = get_windows();
     windows.windows.sort_by(|v1, v2| v2.x.cmp(&v1.x));
 
@@ -73,7 +73,7 @@ pub(crate) fn handle_left() -> ControlFlow {
     ControlFlow::Continue
 }
 
-pub(crate) fn handle_right() -> ControlFlow {
+pub(crate) fn right() -> ControlFlow {
     let mut windows = get_windows();
     windows.windows.sort_by(|v1, v2| v1.x.cmp(&v2.x));
 
@@ -90,7 +90,7 @@ pub(crate) fn handle_right() -> ControlFlow {
     ControlFlow::Continue
 }
 
-pub(crate) fn handle_quit() -> ControlFlow {
+pub(crate) fn quit() -> ControlFlow {
     println!("Ctrl-Alt-Shift L was pressed - Exiting...");
     ControlFlow::Exit
 }
