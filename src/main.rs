@@ -74,43 +74,45 @@ extern "system" fn enum_window(window: HWND, lparam: LPARAM) -> BOOL {
     }
 }
 
+fn handle_left() -> ControlFlow {
+    let mut windows = get_windows();
+    windows.windows.sort_by(|v1, v2| v2.x.cmp(&v1.x));
+
+    if let Some(selected) = windows
+        .windows
+        .iter()
+        .find(|window| window.x < windows.active.x)
+    {
+        println!("Switching to {}", selected.name);
+        unsafe {
+            SetForegroundWindow(selected.hwnd);
+        }
+    }
+    ControlFlow::Continue
+}
+
+fn handle_right() -> ControlFlow {
+    let mut windows = get_windows();
+    windows.windows.sort_by(|v1, v2| v1.x.cmp(&v2.x));
+
+    if let Some(selected) = windows
+        .windows
+        .iter()
+        .find(|window| window.x > windows.active.x)
+    {
+        println!("Switching to {}", selected.name);
+        unsafe {
+            SetForegroundWindow(selected.hwnd);
+        }
+    }
+    ControlFlow::Continue
+}
+
 fn main() -> Result<()> {
     let mut hkm = HotkeyManager::new();
 
-    hkm.register(VKey::Left, &[ModKey::Ctrl, ModKey::Alt], || {
-        let mut windows = get_windows();
-        windows.windows.sort_by(|v1, v2| v2.x.cmp(&v1.x));
-
-        if let Some(selected) = windows
-            .windows
-            .iter()
-            .find(|window| window.x < windows.active.x)
-        {
-            println!("Switching to {}", selected.name);
-            unsafe {
-                SetForegroundWindow(selected.hwnd);
-            }
-        }
-        ControlFlow::Continue
-    })?;
-
-    hkm.register(VKey::Right, &[ModKey::Ctrl, ModKey::Alt], || {
-        let mut windows = get_windows();
-        windows.windows.sort_by(|v1, v2| v1.x.cmp(&v2.x));
-
-        if let Some(selected) = windows
-            .windows
-            .iter()
-            .find(|window| window.x > windows.active.x)
-        {
-            println!("Switching to {}", selected.name);
-            unsafe {
-                SetForegroundWindow(selected.hwnd);
-            }
-        }
-        ControlFlow::Continue
-    })?;
-
+    hkm.register(VKey::Left, &[ModKey::Ctrl, ModKey::Alt], handle_left)?;
+    hkm.register(VKey::Right, &[ModKey::Ctrl, ModKey::Alt], handle_right)?;
     hkm.register(VKey::L, &[ModKey::Ctrl, ModKey::Alt, ModKey::Shift], || {
         println!("Ctrl-Alt-Shift L was pressed - Exiting...");
         ControlFlow::Exit
