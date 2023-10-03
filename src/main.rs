@@ -18,8 +18,8 @@ fn main() -> Result<()> {
     hkm.register(VKey::L, &[ModKey::Ctrl, ModKey::Alt, ModKey::Shift], quit)?;
     let handle = hkm.interrupt_handle();
 
-    let mut tray = TrayItem::new("Tray Example", IconSource::Resource("focus_tray")).unwrap();
-    tray.add_label("Window focuser")?;
+    let mut tray = TrayItem::new("Window Focuser", IconSource::Resource("focus_tray"))?;
+    tray.add_label("Window Focuser")?;
     tray.inner_mut().add_separator()?;
     tray.add_menu_item("Quit", move || {
         handle.interrupt();
