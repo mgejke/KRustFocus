@@ -16,3 +16,8 @@ winvd = "0.0.40"
 
 [build-dependencies]
 windres = "*"
+
+[profile.release]
+opt-level = "z"     # Optimize for size.
+lto = true          # Enable Link Time Optimization
+strip = true        # Automatically strip symbols from the binary.
