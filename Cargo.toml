@@ -1,5 +1,5 @@
 [package]
-name = "window_focus_rust"
+name = "KRustFocus"
 version = "0.1.0"
 edition = "2021"
 
