@@ -7,7 +7,7 @@ use windows::Win32::{
 };
 use winvd::is_window_on_current_desktop;
 
-use crate::models::{ControlFlow, FocusableWindow, TabStopWindows};
+use crate::models::{ComparePosition, ControlFlow, FocusableWindow, TabStopWindows};
 
 extern "system" fn enum_window(window: HWND, lparam: LPARAM) -> BOOL {
     unsafe {
@@ -24,17 +24,16 @@ extern "system" fn enum_window(window: HWND, lparam: LPARAM) -> BOOL {
 
         GetWindowInfo(window, &mut info).unwrap();
         if !text.is_empty()
+            && (windows.window_filter)(&text)
             && info.dwStyle & WS_VISIBLE.0 > 0
             && info.dwStyle & WS_TABSTOP.0 > 0
             && is_window_on_current_desktop(window).unwrap()
         {
             let foreground = GetForegroundWindow();
 
-            let awindow = FocusableWindow {
-                hwnd: window,
-                x: info.rcWindow.left,
-                name: text,
-            };
+            let awindow =
+                FocusableWindow::new(window, text, info.rcWindow.left, info.rcWindow.right);
+            println!("Window - {:?}", awindow);
             if foreground == window {
                 windows.active = awindow
             } else {
@@ -56,14 +55,17 @@ fn get_windows() -> TabStopWindows {
     windows
 }
 
-pub(crate) fn left() -> ControlFlow {
+pub(crate) fn left(c: ComparePosition) -> ControlFlow {
     let mut windows = get_windows();
-    windows.windows.sort_by(|v1, v2| v2.x.cmp(&v1.x));
+
+    windows
+        .windows
+        .sort_by_key(|v2| std::cmp::Reverse(v2.get_position(c)));
 
     if let Some(selected) = windows
         .windows
         .iter()
-        .find(|window| window.x < windows.active.x)
+        .find(|window| window.get_position(c) < windows.active.get_position(c))
     {
         println!("Switching to {}", selected.name);
         unsafe {
@@ -73,14 +75,14 @@ pub(crate) fn left() -> ControlFlow {
     ControlFlow::Continue
 }
 
-pub(crate) fn right() -> ControlFlow {
+pub(crate) fn right(c: ComparePosition) -> ControlFlow {
     let mut windows = get_windows();
-    windows.windows.sort_by(|v1, v2| v1.x.cmp(&v2.x));
+    windows.windows.sort_by_key(|v1| v1.get_position(c));
 
     if let Some(selected) = windows
         .windows
         .iter()
-        .find(|window| window.x > windows.active.x)
+        .find(|window| window.get_position(c) > windows.active.get_position(c))
     {
         println!("Switching to {}", selected.name);
         unsafe {

@@ -1,4 +1,4 @@
-#![windows_subsystem = "windows"]
+// #![windows_subsystem = "windows"]
 
 mod handlers;
 mod models;
@@ -13,8 +13,14 @@ use tray_item::{IconSource, TrayItem};
 
 fn main() -> Result<()> {
     let mut hkm = HotkeyManager::new();
-    hkm.register(VKey::Left, &[ModKey::Ctrl, ModKey::Alt], left)?;
-    hkm.register(VKey::Right, &[ModKey::Ctrl, ModKey::Alt], right)?;
+
+    hkm.register(VKey::Left, &[ModKey::Ctrl, ModKey::Alt], move || {
+        left(models::ComparePosition::Avg)
+    })?;
+    hkm.register(VKey::Right, &[ModKey::Ctrl, ModKey::Alt], move || {
+        right(models::ComparePosition::Avg)
+    })?;
+
     hkm.register(VKey::L, &[ModKey::Ctrl, ModKey::Alt, ModKey::Shift], quit)?;
     let handle = hkm.interrupt_handle();
 
